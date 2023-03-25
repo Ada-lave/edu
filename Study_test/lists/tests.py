@@ -18,3 +18,14 @@ class HomeTest(TestCase):
         self.assertTrue(html.startswith('<html>'))
         self.assertIn('<title>To-Do lists</title>',html)
         self.assertTrue(html.endswith('</html>'))
+
+    def test_uses_home_template(self):
+        """Проверка что на нужной странице"""
+        response = self.client.get('/')
+        self.assertTemplateUsed(response,'lists/home.html')
+    
+    def test_can_save_a_POST(self):
+        """Проверка можно ли сохранить пост запрос"""
+        response = self.client.post('/',data={'item_text':'A new list item'})
+        self.assertIn('A new list item', response.content.decode())
+        self.assertTemplateUsed(response,'lists/home.html')
