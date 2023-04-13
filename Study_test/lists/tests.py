@@ -28,8 +28,18 @@ class HomeTest(TestCase):
     def test_can_save_a_POST(self):
         """Проверка можно ли сохранить пост запрос"""
         response = self.client.post('/',data={'item_text':'A new list item'})
-        self.assertIn('A new list item', response.content.decode())
-        self.assertTemplateUsed(response,'lists/home.html')
+
+        self.assertEqual(Item.objects.count(),1)
+        new_i = Item.objects.first()
+        self.assertEqual(new_i.text, 'A new list item')
+
+    def test_redirect_work(self):
+        response = self.client.post('/',data={'item_text':'A new list item'})
+
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'],'/')
+
 
 
 class ItemModelTest(TestCase):
@@ -53,6 +63,26 @@ class ItemModelTest(TestCase):
 
         self.assertEqual(first.text, 'The first element')
         self.assertEqual(second.text, 'This second item')
+
+    
+    def test_only_saves_items_when_nessary(self):
+        self.client.get('/')
+        self.assertEqual(Item.objects.count(),0)
+
+
+class HomePageTest(TestCase):
+    '''Проверка элементов на странице'''
+
+    def test_display_all(self):
+
+
+        Item.objects.create(text='item 1')
+        Item.objects.create(text='item 2')
+
+        response = self.client.get('/')
+
+        self.assertIn('item 1', response.content.decode())
+        self.assertIn('item 2', response.content.decode())
 
 
 
